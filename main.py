@@ -13,7 +13,7 @@ if vk_token == "":
 if spotify_token == "":
 	spotify_token = input("Введите токен Spotify с доступом к плейлистам, получить вы можете его на сайте http://easygame.website/get_spotify_token.php: ")
 if user_id == "":
-	user_id = input("Введите id пользователя с аудиозаписями: ")
+	user_id = input("Введите id или буквенный id пользователя с аудиозаписями: ")
 if playlist_name == "":
 	playlist_name = input("Введите название плейлиста в Spotify: ")
 
@@ -22,6 +22,14 @@ sort = lambda lst, sz: [lst[i:i+sz] for i in range(0, len(lst), sz)]
 track = []
 non_added_track = []
 tracks_sp = []
+try:
+	new_id = re.findall(r'\D', user_id)[0]
+	if new_id != "":
+		res = json.loads(requests.get(f"https://api.vk.com/method/users.get?v=5.89&access_token={vk_token}&user_ids={user_id}").text)["response"][0]["id"]
+	user_id = res
+except:
+	user_id = user_id
+
 req = json.loads(requests.get(f"https://api.vk.com/method/audio.get?v=5.107&access_token={vk_token}&owner_id={user_id}").text)
 try:
 	count_full = req["response"]["count"]
@@ -33,6 +41,8 @@ except KeyError:
 		print("Нет прав у токена для выполнения этого действия")
 	if error == 18:
 		print("Страница удалена или заблокированна")
+	else:
+		print(error)
 	exit()
 a = math.ceil(count_full/200)
 b = 0
